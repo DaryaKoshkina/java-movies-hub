@@ -1,25 +1,29 @@
 package ru.practicum.moviehub.model;
 
 public class Movie {
-    private final Long id;
-    private final String name;
+    private String id;
+    private final String title;
     private final Integer  year;
 
-    public Movie(Long id, Integer year, String name) {
+    public Movie(String id, Integer year, String title) {
         this.id = id;
         this.year = year;
-        this.name = name;
-    }
-
-    public Long getId() {
-        return id;
+        this.title = title;
     }
 
     public Integer getYear() {
         return year;
     }
 
-    public String getName() {
-        return name;
+    public String getTitle() {
+        return title;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 }

@@ -10,4 +10,17 @@ public class ErrorResponse {
         this.error = error;
         this.details = details;
     }
+
+    public ErrorResponse(String error) {
+        this.error = error;
+        this.details = List.of();
+    }
+
+    public String getError() {
+        return error;
+    }
+
+    public List<String> getDetails() {
+        return details;
+    }
 }
