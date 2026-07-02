@@ -82,7 +82,20 @@ class MoviesHandler extends BaseHttpHandler {
 
                         try (InputStreamReader reader = new InputStreamReader(ex.getRequestBody(), StandardCharsets.UTF_8)) {
                             Movie movie = gson.fromJson(reader, Movie.class);
-                            List<String> details = getStrings(movie);
+                            List<String> details = new ArrayList<>();
+
+                            if (movie == null) {
+                                details.add("Тело запроса не должно быть пустым");
+                            } else {
+                                if (movie.getTitle() == null || movie.getTitle().isBlank()) {
+                                    details.add("название не должно быть пустым");
+                                } else if (movie.getTitle().length() > 100) {
+                                    details.add("длина названия не должна превышать 100 символов");
+                                }
+                                if (movie.getYear() == null || movie.getYear() < 1888 || movie.getYear() > 2027) {
+                                    details.add("год должен быть между 1888 и 2027");
+                                }
+                            }
 
                             if (!details.isEmpty()) {
                                 sendJson(ex, 422, gson.toJson(new ErrorResponse("Ошибка валидации", details)));
@@ -139,23 +152,5 @@ class MoviesHandler extends BaseHttpHandler {
         } finally {
             ex.close();
         }
-    }
-
-    private static List<String> getStrings(Movie movie) {
-        List<String> details = new ArrayList<>();
-
-        if (movie == null) {
-            details.add("Тело запроса не должно быть пустым");
-        } else {
-            if (movie.getTitle() == null || movie.getTitle().isBlank()) {
-                details.add("название не должно быть пустым");
-            } else if (movie.getTitle().length() > 100) {
-                details.add("длина названия не должна превышать 100 символов");
-            }
-            if (movie.getYear() == null || movie.getYear() < 1888 || movie.getYear() > 2027) {
-                details.add("год должен быть между 1888 и 2027");
-            }
-        }
-        return details;
     }
 }

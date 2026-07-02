@@ -80,8 +80,8 @@ public class MoviesApiTest {
         store.save(new Movie(null, "Inception", 2010));
         store.save(new Movie(null, "Avatar", 2009));
 
-        HttpRequest req = HttpRequest.newBuilder().
-                uri(URI.create(BASE + "/movies"))
+        HttpRequest req = HttpRequest.newBuilder()
+                .uri(URI.create(BASE + "/movies"))
                 .GET()
                 .build();
         HttpResponse<String> resp = client.send(req, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
