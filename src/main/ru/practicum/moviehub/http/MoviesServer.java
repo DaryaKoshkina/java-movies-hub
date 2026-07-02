@@ -20,7 +20,7 @@ public class MoviesServer {
     public MoviesServer(MoviesStore store, int port) throws IOException {
         this.server = HttpServer.create(new InetSocketAddress(port), 0);
 
-        // Передаем в контекст отдельный класс-обработчик
+
         this.server.createContext("/movies", new MoviesHandler(store));
         this.server.setExecutor(null);
     }
@@ -36,8 +36,7 @@ public class MoviesServer {
     }
 }
 
-// 2. Отдельный класс-обработчик. Так как он лежит в той же папке (http)
-// и наследует BaseHttpHandler, он идеально видит все protected-методы sendJson!
+
 class MoviesHandler extends BaseHttpHandler {
     private final MoviesStore store;
     private final Gson gson = new Gson();
@@ -53,7 +52,6 @@ class MoviesHandler extends BaseHttpHandler {
             String path = ex.getRequestURI().getPath();
             String query = ex.getRequestURI().getQuery();
 
-            // БЛОК 1. Работа с коллекцией фильмов (/movies)
             if ("/movies".equals(path) || "/movies/".equals(path)) {
                 switch (method) {
                     case "GET":
@@ -84,20 +82,7 @@ class MoviesHandler extends BaseHttpHandler {
 
                         try (InputStreamReader reader = new InputStreamReader(ex.getRequestBody(), StandardCharsets.UTF_8)) {
                             Movie movie = gson.fromJson(reader, Movie.class);
-                            List<String> details = new ArrayList<>();
-
-                            if (movie == null) {
-                                details.add("Тело запроса не должно быть пустым");
-                            } else {
-                                if (movie.getTitle() == null || movie.getTitle().isBlank()) {
-                                    details.add("название не должно быть пустым");
-                                } else if (movie.getTitle().length() > 100) {
-                                    details.add("длина названия не должна превышать 100 символов");
-                                }
-                                if (movie.getYear() == null || movie.getYear() < 1888 || movie.getYear() > 2027) {
-                                    details.add("год должен быть между 1888 и 2027");
-                                }
-                            }
+                            List<String> details = getStrings(movie);
 
                             if (!details.isEmpty()) {
                                 sendJson(ex, 422, gson.toJson(new ErrorResponse("Ошибка валидации", details)));
@@ -114,12 +99,11 @@ class MoviesHandler extends BaseHttpHandler {
                         break;
                 }
             }
-            // БЛОК 2. Работа с конкретным фильмом по ID (/movies/{id})
-            else if (path.startsWith("/movies/")) {
-                String idParam = path.substring(8);
 
+            else if (path.startsWith("/movies/")) {
+                Long idParam;
                 try {
-                    Long.parseLong(idParam);
+                    idParam = Long.parseLong(path.substring(8));
                 } catch (NumberFormatException e) {
                     sendJson(ex, 400, gson.toJson(new ErrorResponse("Некорректный ID")));
                     return;
@@ -155,5 +139,23 @@ class MoviesHandler extends BaseHttpHandler {
         } finally {
             ex.close();
         }
+    }
+
+    private static List<String> getStrings(Movie movie) {
+        List<String> details = new ArrayList<>();
+
+        if (movie == null) {
+            details.add("Тело запроса не должно быть пустым");
+        } else {
+            if (movie.getTitle() == null || movie.getTitle().isBlank()) {
+                details.add("название не должно быть пустым");
+            } else if (movie.getTitle().length() > 100) {
+                details.add("длина названия не должна превышать 100 символов");
+            }
+            if (movie.getYear() == null || movie.getYear() < 1888 || movie.getYear() > 2027) {
+                details.add("год должен быть между 1888 и 2027");
+            }
+        }
+        return details;
     }
 }
