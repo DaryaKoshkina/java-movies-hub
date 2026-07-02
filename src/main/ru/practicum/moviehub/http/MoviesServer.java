@@ -110,7 +110,6 @@ public class MoviesServer {
                             break;
                     }
                 }
-
                 else if (path.startsWith("/movies/")) {
                     Long idParam;
                     try {
