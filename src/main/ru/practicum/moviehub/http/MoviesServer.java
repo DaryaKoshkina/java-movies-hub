@@ -109,8 +109,7 @@ public class MoviesServer {
                             ex.sendResponseHeaders(405, -1);
                             break;
                     }
-                }
-                else if (path.startsWith("/movies/")) {
+                } else if (path.startsWith("/movies/")) {
                     Long idParam;
                     try {
                         idParam = Long.parseLong(path.substring(8));
